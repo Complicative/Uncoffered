@@ -46,7 +46,7 @@ function Uncoffered.GetMysteryFromNormal(itemLink)
   --returns ItemLink of the Mystery Coffer, that the Normal Coffer is related to
   local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
   --Finds the cofferId in Database and returns the cofferid it is saved in. Hardcoded Database!
-  for k, v in pairs(UncofferedData.CofferDbMini) do
+  for k, v in pairs(UncofferedData.CofferDB) do
     for i = 1, #v do
       if cofferId == v[i] then
         return Uncoffered.GetItemLinkFromId(k)
@@ -101,22 +101,22 @@ function Uncoffered.GetMysteryInfo(itemLink, type)
   local cofferName = GetItemLinkName(itemLink)
   local totalCollected = 0
   --cofferAmount comes from hardcoded Database
-  local cofferAmount = #UncofferedData.CofferDbMini[cofferId]
+  local setsAmount = #UncofferedData.CofferDB[cofferId]
   local total
   --Undaunted Coffers drop double the shoulder
-  if type == 0 then total = (cofferAmount * 3 * 2) end
-  if type == 1 then total = (cofferAmount * 3) end
+  if type == 0 then total = (setsAmount * 3 * 2) end
+  if type == 1 then total = (setsAmount * 3) end
 
   --Table for saving the % of each normal coffer. Used to find the one with the best and output in the tooltip as advice, which one to open.
-  local normalPTable = {}
+  local normalTable = {}
 
-  for i = 1, cofferAmount do
+  for i = 1, setsAmount do
     --Counts the collected amount of shoulder and saves the highest amount of uncollected % in the table
-    local NormalId = UncofferedData.CofferDbMini[cofferId][i]
-    local NormalItemLink = (Uncoffered.GetItemLinkFromId(NormalId))
-    local _, _, tCollected, _, _, pUncollected = Uncoffered.GetNormalInfo(NormalItemLink, type)
+    local normalId = UncofferedData.CofferDB[cofferId][i]
+    local normalItemLink = (Uncoffered.GetItemLinkFromId(normalId))
+    local _, _, tCollected = Uncoffered.GetNormalInfo(normalItemLink, type)
     totalCollected = totalCollected + tCollected
-    table.insert(normalPTable, pUncollected)
+    table.insert(normalTable, Uncoffered.GetItemLinkFromId(normalId))
   end
   local pCollected = (totalCollected / total)
   local pUncollected = 1 - pCollected
@@ -127,7 +127,7 @@ function Uncoffered.GetMysteryInfo(itemLink, type)
 
   --returns all the collected info
   return cofferId, cofferName, totalCollected, total, pCollected, pUncollected, pCollectedPow, pUncollectedPow
-      , normalPTable
+      , normalTable
 
 end
 
@@ -137,19 +137,20 @@ function Uncoffered.GetBestNormalFromMystery(itemLink, type)
   --type == 1 --> Imperial City Coffer
 
   --gets the table with the % of every related normal coffer
-  local cofferId, _, _, _, _, _, _, _, normalPTable = Uncoffered.GetMysteryInfo(itemLink, type)
+  local cofferId, _, _, _, _, _, _, _, normalTable = Uncoffered.GetMysteryInfo(itemLink, type)
 
   local highestP = 0
   local highestName = ""
   local highestId
   local highestItemLink
   --finds the highest % and the name of the coffer (Same Order in the hardcoded Database)
-  for i = 1, #normalPTable do
-    if highestP < normalPTable[i] then
-      highestP = normalPTable[i]
-      highestId = UncofferedData.CofferDbMini[cofferId][i]
-      highestItemLink = Uncoffered.GetItemLinkFromId(highestId)
-      highestName = GetItemLinkName(highestItemLink)
+  for i = 1, #normalTable do
+    local cId, cName, _, _, _, pUncollected, _, _ = Uncoffered.GetNormalInfo(normalTable[i], type)
+    if highestP < pUncollected then
+      highestP = pUncollected
+      highestItemLink = normalTable[i]
+      highestId = cId
+      highestName = cName
     end
   end
 
@@ -179,7 +180,8 @@ local function GetToolTipTextMystery(itemLink, type)
 
   --If everything is collected, we don't need any fancy tooltip
   if totalCollected == total then
-    return string.format("%s/%s Collected.\nEverything has been collected. Well done!", totalCollected, total)
+    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
+      totalCollected, total, cEnd())
   end
 
   --concats the string
@@ -212,7 +214,8 @@ local function GetToolTipTextNormal(itemLink, type)
 
   --If everything is collected, we don't need any fancy tooltip
   if totalCollected == total then
-    return string.format("%s/%s Collected.\nEverything has been collected. Well done!", totalCollected, total)
+    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
+      totalCollected, total, cEnd())
   end
 
   --concats the string
@@ -226,13 +229,14 @@ end
 
 local function GetInfoText(itemLink)
   --returns final tooltip text. Whatever string is returned here, will end up in the tooltip
+  --decision about what type of coffer it is, happens here
 
   if debug then return Uncoffered.GetIdFromItemLink(itemLink) end --Debug tooltip which shows the id of the item
 
   local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
   local type
 
-  if UncofferedData.CofferDbMini[cofferId] ~= nil then
+  if UncofferedData.CofferDB[cofferId] ~= nil then
     --Mystery Coffer
     if cofferId == 184208 then type = 1 else type = 0 end --IC or Undaunted Coffer
     return GetToolTipTextMystery(itemLink, type) --gets the tooltip string and returns it
@@ -248,10 +252,12 @@ local function GetInfoText(itemLink)
 end
 
 local function AddInfo(tooltip, item)
-  --don't mess with this. Stolen, cause tooltips are hard
+  --don't mess with this. Mostly stolen, cause tooltips are hard
   if item then
-    tooltip:AddVerticalPadding(8)
+    tooltip:AddLine("---------------------------", "", 0.5, 0.5, 0.5, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER,
+      true)
     tooltip:AddLine(item, "", 1, 1, 1, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, true)
+
   end
 end
 
@@ -305,8 +311,8 @@ EVENT_MANAGER:RegisterForEvent(Uncoffered.name, EVENT_ADD_ON_LOADED, Uncoffered.
 ----------------------------------------------
 
 local function printCoffers(id)
-  for i = 1, #UncofferedData.CofferDbMini[id] do
-    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(UncofferedData.CofferDbMini[id][i]))
+  for i = 1, #UncofferedData.CofferDB[id] do
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(UncofferedData.CofferDB[id][i]))
   end
 end
 
