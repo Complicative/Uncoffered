@@ -3,7 +3,7 @@
 ## APIVersion: 101034
 ## IsLibrary: false
 ## SavedVariables:
-## DependsOn: LibAddonMenu-2.0
+## DependsOn:
 
 UncofferedData.lua
 Uncoffered.lua

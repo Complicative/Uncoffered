@@ -9,7 +9,6 @@ Uncoffered.Settings = {
   --None for now
 }
 
-local LAM2 = LibAddonMenu2
 local debug = false
 
 --------------------------------------
@@ -294,37 +293,6 @@ function Uncoffered.OnAddOnLoaded(event, addonName) --initialize the addon
 
 
   --Saved Settings (None currently)
-
-  -------------------------------------------
-  -- Settings --
-  -------------------------------------------
-  local panelData = {
-    type = "panel",
-    name = "Uncoffered",
-    author = '@Complicative',
-    version = Uncoffered.version,
-    website = "https://github.com/Complicative/Uncoffered",
-  }
-
-  LAM2:RegisterAddonPanel("UncofferedOptions", panelData)
-
-  local optionsData = {}
-  optionsData[#optionsData + 1] = {
-    type = "description",
-    text = "Adds a tooltip info to Shoulder Coffers (Undaunted and Imperical City) with info about the chances for a new shoulder pieces and which coffer to open for highest chances."
-  }
-  optionsData[#optionsData + 1] = {
-    type = "divider",
-  }
-  optionsData[#optionsData + 1] = {
-    type = "checkbox",
-    name = "Debug",
-    tooltip = "I wouldn't touch that",
-    getFunc = function() return debug end,
-    setFunc = function(value) debug = value end,
-  }
-
-  LAM2:RegisterOptionControls("UncofferedOptions", optionsData)
 end
 
 ----------------------------------------------
