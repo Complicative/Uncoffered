@@ -28,6 +28,7 @@ UncofferedData.CofferDB = {
         159621, --Harrowstorm Coffer
         153529, --Horns of the Reach Coffer
         153527, --Imperial City Coffer
+        190366, --Lost Depths Coffer
         153533, --Scalebreaker Coffer
         153528, --Shadows of the Hist Coffer
         167243, --Stonethorn Coffer
@@ -45,7 +46,3 @@ UncofferedData.CofferDB = {
         175913, --Toal the Ever-Wakeful
     }
 }
-
------------------------------
--- Data Dump --
------------------------------

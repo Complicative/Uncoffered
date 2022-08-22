@@ -1,6 +1,6 @@
 Uncoffered = {
   name = "Uncoffered",
-  version = "1.0.2",
+  version = "1.0.3",
   author = "@Complicative",
 }
 
@@ -9,9 +9,9 @@ Uncoffered.Settings = {
   --None for now
 }
 
-local debug = false
-
 --------------------------------------
+
+local debug = false
 
 --Local Utility Functions
 local function cStart(hex) return "|c" .. hex end --returns colour start for a string
@@ -231,8 +231,6 @@ local function GetInfoText(itemLink)
   --returns final tooltip text. Whatever string is returned here, will end up in the tooltip
   --decision about what type of coffer it is, happens here
 
-  if debug then return Uncoffered.GetIdFromItemLink(itemLink) end --Debug tooltip which shows the id of the item
-
   local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
   local type
 
@@ -338,6 +336,9 @@ SLASH_COMMANDS["/uncoffered"] = function(args)
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(184208))
     printCoffers(184208)
     d(getTimeStamp() .. "---------------------------")
+    return
   end
+
+  CHAT_SYSTEM:AddMessage(string.format("%s by %s, Version: %s", Uncoffered.name, Uncoffered.author, Uncoffered.version))
 
 end
