@@ -252,8 +252,8 @@ end
 local function AddInfo(tooltip, item)
   --don't mess with this. Mostly stolen, cause tooltips are hard
   if item then
-    tooltip:AddLine("---------------------------", "", 0.5, 0.5, 0.5, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER,
-      true)
+    tooltip:AddVerticalPadding(8)
+    ZO_Tooltip_AddDivider(tooltip)
     tooltip:AddLine(item, "", 1, 1, 1, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, true)
 
   end
