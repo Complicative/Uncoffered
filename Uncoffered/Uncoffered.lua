@@ -1,6 +1,6 @@
 Uncoffered = {
   name = "Uncoffered",
-  version = "1.0.3",
+  version = "1.0.4",
   author = "@Complicative",
 }
 
@@ -201,7 +201,7 @@ local function GetToolTipTextNormal(itemLink, type)
 
   --get all the info needed for the tooltip
   local _, cofferName, totalCollected, total, _, pUncollected = Uncoffered.GetNormalInfo(itemLink, type)
-  local _, mysteryName, _, _, _, _, _, pMysteryPow = Uncoffered.GetMysteryInfo(Uncoffered.GetMysteryFromNormal(itemLink)
+  local _, mysteryName, _, totalMystery, _, _, _, pMysteryPow = Uncoffered.GetMysteryInfo(Uncoffered.GetMysteryFromNormal(itemLink)
     , type)
 
   --writes and returns string with the tooltip text for a normal coffer
@@ -209,8 +209,8 @@ local function GetToolTipTextNormal(itemLink, type)
   local toOpen
 
   --sets the vars for the difference between IC and Undaunted Coffers
-  if type == 1 then toOpen = "2" end
-  if type == 0 then toOpen = "5" end
+  if type == 1 then toOpen = 2 end
+  if type == 0 then toOpen = 5 end
 
   --If everything is collected, we don't need any fancy tooltip
   if totalCollected == total then
@@ -220,9 +220,14 @@ local function GetToolTipTextNormal(itemLink, type)
 
   --concats the string
   str = str .. string.format("%d/%d Collected\n", totalCollected, total)
-  str = str .. string.format("Open 1x %s: %s\n", cofferName, pColoredStr(pUncollected, pMysteryPow, "00FF00", "FF0000"))
+  --@SimpsForBreda uncomment the line below
   str = str ..
-      string.format("Open %sx %s: %s", toOpen, mysteryName, pColoredStr(pMysteryPow, pUncollected, "00FF00", "FF0000"))
+      string.format("New %s item from %dx %s: %.2f%%\n", cofferName, toOpen, mysteryName,
+        (1 - ((totalMystery - (total - totalCollected)) / totalMystery) ^ toOpen) * 100)
+  str = str .. string.format("Chance for any new shoulder:\n")
+  str = str .. string.format("1x %s: %s\n", cofferName, pColoredStr(pUncollected, pMysteryPow, "00FF00", "FF0000"))
+  str = str ..
+      string.format("%dx %s: %s", toOpen, mysteryName, pColoredStr(pMysteryPow, pUncollected, "00FF00", "FF0000"))
 
   return str --returns the finished string
 end
