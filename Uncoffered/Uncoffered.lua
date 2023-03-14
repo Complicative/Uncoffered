@@ -1,6 +1,6 @@
 Uncoffered = {
   name = "Uncoffered",
-  version = "1.0.4",
+  version = "1.0.5",
   author = "@Complicative",
 }
 
@@ -14,13 +14,13 @@ Uncoffered.Settings = {
 local debug = false
 
 --Local Utility Functions
-local function cStart(hex) return "|c" .. hex end --returns colour start for a string
+local function cStart(hex) return "|c" .. hex end                                                         --returns colour start for a string
 
-local function cEnd() return "|r" end --return colour end string
+local function cEnd() return "|r" end                                                                     --return colour end string
 
 local function getTimeStamp() return cStart("888888") .. "[" .. os.date('%H:%M:%S') .. "] " .. cEnd() end --returns a timestamp in gray
 
-local pColoredStr = function(num1, num2, c1, c2) --returns a percantage of num1 in colour c1 if num1 > num2. c2 if num1 < num2
+local pColoredStr = function(num1, num2, c1, c2)                                                          --returns a percantage of num1 in colour c1 if num1 > num2. c2 if num1 < num2
   local color = function() if num1 > num2 then return c1 else return c2 end end
   return string.format("%s%.2f%s%s", cStart(color()), num1 * 100, "%", cEnd())
 end
@@ -34,7 +34,8 @@ function Uncoffered.IsCollectedFromSetId(setId, i)
   return IsItemSetCollectionSlotUnlocked(setId, slot)
 end
 
-function Uncoffered.GetItemLinkFromId(id) local cofferId = id
+function Uncoffered.GetItemLinkFromId(id)
+  local cofferId = id
   --returns an ItemLink from id
   return "|H1:item:" ..
       cofferId .. ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
@@ -127,8 +128,7 @@ function Uncoffered.GetMysteryInfo(itemLink, type)
 
   --returns all the collected info
   return cofferId, cofferName, totalCollected, total, pCollected, pUncollected, pCollectedPow, pUncollectedPow
-      , normalTable
-
+  , normalTable
 end
 
 function Uncoffered.GetBestNormalFromMystery(itemLink, type)
@@ -201,8 +201,9 @@ local function GetToolTipTextNormal(itemLink, type)
 
   --get all the info needed for the tooltip
   local _, cofferName, totalCollected, total, _, pUncollected = Uncoffered.GetNormalInfo(itemLink, type)
-  local _, mysteryName, _, totalMystery, _, _, _, pMysteryPow = Uncoffered.GetMysteryInfo(Uncoffered.GetMysteryFromNormal(itemLink)
-    , type)
+  local _, mysteryName, _, totalMystery, _, _, _, pMysteryPow = Uncoffered.GetMysteryInfo(
+  Uncoffered.GetMysteryFromNormal(itemLink)
+  , type)
 
   --writes and returns string with the tooltip text for a normal coffer
   local str = ""
@@ -242,16 +243,15 @@ local function GetInfoText(itemLink)
   if UncofferedData.CofferDB[cofferId] ~= nil then
     --Mystery Coffer
     if cofferId == 184208 then type = 1 else type = 0 end --IC or Undaunted Coffer
-    return GetToolTipTextMystery(itemLink, type) --gets the tooltip string and returns it
+    return GetToolTipTextMystery(itemLink, type)          --gets the tooltip string and returns it
   end
 
   if Uncoffered.GetMysteryFromNormal(itemLink) ~= nil then
     --Normal Coffer
     local mysteryCoffer = Uncoffered.GetMysteryFromNormal(itemLink)
     if Uncoffered.GetIdFromItemLink(mysteryCoffer) == 184208 then type = 1 else type = 0 end --IC or Undaunted Coffer
-    return GetToolTipTextNormal(itemLink, type) --gets the tooltip string and returns it
+    return GetToolTipTextNormal(itemLink, type)                                              --gets the tooltip string and returns it
   end
-
 end
 
 local function AddInfo(tooltip, item)
@@ -260,7 +260,6 @@ local function AddInfo(tooltip, item)
     tooltip:AddVerticalPadding(8)
     ZO_Tooltip_AddDivider(tooltip)
     tooltip:AddLine(item, "", 1, 1, 1, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, true)
-
   end
 end
 
@@ -320,14 +319,15 @@ local function printCoffers(id)
 end
 
 SLASH_COMMANDS["/uncoffered"] = function(args)
-
-  if args == "debug" then debug = not debug
+  if args == "debug" then
+    debug = not debug
     d(getTimeStamp() .. "debug has been set to " .. tostring(debug))
     return
   end
   if args == "print" then
     d(getTimeStamp() .. "---------------------------")
-    d("This is a debug function. I left it in, with debug off, since I think, it could be usefull in non-debug mode as well.")
+    d(
+    "This is a debug function. I left it in, with debug off, since I think, it could be usefull in non-debug mode as well.")
     d(getTimeStamp() .. "---------------------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(153513))
     printCoffers(153513)
@@ -345,5 +345,4 @@ SLASH_COMMANDS["/uncoffered"] = function(args)
   end
 
   CHAT_SYSTEM:AddMessage(string.format("%s by %s, Version: %s", Uncoffered.name, Uncoffered.author, Uncoffered.version))
-
 end

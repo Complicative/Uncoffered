@@ -1,8 +1,7 @@
 UncofferedData = {}
 
 UncofferedData.CofferDB = {
-
-    [153513] = --Maj's Mystery Coffer
+    [153513] =  --Maj's Mystery Coffer
     {
         153512, --Banished Cells Coffer
         153516, --Darkshade Caverns Coffer
@@ -11,7 +10,7 @@ UncofferedData.CofferDB = {
         153519, --Spindleclutch Coffer
         153520, --Wayrest Sewers Coffer
     },
-    [153514] = --Gliron's Mystery Coffer
+    [153514] =  --Gliron's Mystery Coffer
     {
         153521, --City of Ash Coffer
         153522, --Crypt of Hearts Coffer
@@ -20,7 +19,7 @@ UncofferedData.CofferDB = {
         153523, --Serpents and Sailors Coffer
         153525, --Winds and Webs Coffer
     },
-    [153515] = --Urgarlag's Mystery Coffer
+    [153515] =  --Urgarlag's Mystery Coffer
     {
         184251, --Ascending Tide Coffer
         153530, --Dragon Bones Coffer
@@ -30,13 +29,14 @@ UncofferedData.CofferDB = {
         153527, --Imperial City Coffer
         190366, --Lost Depths Coffer
         153533, --Scalebreaker Coffer
+        193849, --Scribes of Fate Coffer
         153528, --Shadows of the Hist Coffer
         167243, --Stonethorn Coffer
         181544, --Waking Flame Coffer
         153531, --Wolfhunter Coffer
         153532, --Wrathstone Coffer
     },
-    [184208] = --Imperial City Mystery Coffer
+    [184208] =  --Imperial City Mystery Coffer
     {
         184118, --Baron Thirsk
         175803, --Glorgoloch the Destroyer
