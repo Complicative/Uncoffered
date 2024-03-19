@@ -35,6 +35,7 @@ UncofferedData.CofferDB = {
         181544, --Waking Flame Coffer
         153531, --Wolfhunter Coffer
         153532, --Wrathstone Coffer
+        204484, --Scions of Ithelia Coffer
     },
     [184208] =  --Imperial City Mystery Coffer
     {
@@ -44,5 +45,22 @@ UncofferedData.CofferDB = {
         184117, --Lady Malygda
         184116, --Nunatak
         175913, --Toal the Ever-Wakeful
+    },
+    ["Cyrodiil"] = {
+        [199140] = 0,
+        [198854] = 1,
+        [199141] = 0,
+        [198798] = 1,
+        [199142] = 0,
+        [198713] = 1
+    },
+    ["IA"] = {
+        203097, --Basalt-Blood Warrior
+        203107, --Gardener of Seasons
+        203103, --Monolith of Storms
+        203099, --Nobility in Decay
+        203095, --Reawakened Hierophant
+        203101, --Soulcleaver
+        203105, --Wrathsun
     }
 }

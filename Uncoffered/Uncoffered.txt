@@ -1,5 +1,5 @@
 ## Title: Uncoffered: Is it worth it?
-## Version: 1.0.5
+## Version: 1.1.0
 ## APIVersion: 101037
 ## IsLibrary: false
 ## SavedVariables:
