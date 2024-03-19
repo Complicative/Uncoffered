@@ -1,9 +1,14 @@
 ## Title: Uncoffered: Is it worth it?
-## Version: 1.1.0
+## Version: 2.0.0
 ## APIVersion: 101037
 ## IsLibrary: false
 ## SavedVariables:
 ## DependsOn:
 
 UncofferedData.lua
+
+Coffers/Undaunted.lua
+Coffers/IC.lua
+Coffers/Cyrodiil.lua
+Coffers/IA.lua
 Uncoffered.lua

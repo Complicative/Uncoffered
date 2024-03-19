@@ -1,6 +1,6 @@
 Uncoffered = {
   name = "Uncoffered",
-  version = "1.1.0",
+  version = "2.0.0",
   author = "@Complicative",
 }
 
@@ -11,7 +11,7 @@ Uncoffered.Settings = {
 
 --------------------------------------
 
-local debug = true
+local debug = false
 
 --Local Utility Functions
 local function cStart(hex) return "|c" .. hex end                                                         --returns colour start for a string
@@ -27,6 +27,23 @@ end
 
 ------------------------------------
 
+local UNDAUNTED_MYSTERY, UNDAUNTED_NORMAL = 1, 2
+local IMPERIAL_CITY_MYSTERY, IMPERIAL_CITY_NORMAL = 3, 4
+local CYRODIIL_SHOULDERS, CYRODIIL_MASK = 5, 6
+local INFINITE_ARCHIVE_CURRATED, INFINITE_ARCHIVE_NORMAL = 7, 8
+
+Uncoffered.functions = {
+  [0] = function() return end,
+  [UNDAUNTED_MYSTERY] = UCUndaunted.GetMysteryText,
+  [UNDAUNTED_NORMAL] = UCUndaunted.GetNormalText,
+  [IMPERIAL_CITY_MYSTERY] = UCIC.GetMysteryText,
+  [IMPERIAL_CITY_NORMAL] = UCIC.GetNormalText,
+  [CYRODIIL_SHOULDERS] = UCCyrodiil.GetShoulderText,
+  [CYRODIIL_MASK] = UCCyrodiil.GetMaskText,
+  [INFINITE_ARCHIVE_CURRATED] = UCIA.GetCurratedText,
+  [INFINITE_ARCHIVE_NORMAL] = UCIA.GetNormalText,
+}
+
 
 function Uncoffered.IsCollectedFromSetId(setId, i)
   --returns if item is collected
@@ -41,7 +58,7 @@ function Uncoffered.GetItemLinkFromId(id)
       cofferId .. ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
 end
 
-function Uncoffered.GetIdFromItemLink(itemLink) return GetItemLinkItemId(itemLink) end --returns Id from ItemLink
+--[[ function Uncoffered.GetIdFromItemLink(itemLink) return GetItemLinkItemId(itemLink) end --returns Id from ItemLink ]]
 
 function Uncoffered.GetMysteryFromNormal(itemLink)
   --returns ItemLink of the Mystery Coffer, that the Normal Coffer is related to
@@ -58,306 +75,41 @@ function Uncoffered.GetMysteryFromNormal(itemLink)
   return nil
 end
 
-function Uncoffered.GetNormalInfo(itemLink, type)
-  d(type)
-  --returns info on a normal coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer
-  --type == 2 --> Cyrodiil Shoulder
-  --type == 3 --> Cyrodiil Head
-  --type == 4 --> IA
-
-  local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
-  local cofferName = GetItemLinkName(itemLink)
-
-  --Ids of the sets that can drop from the coffer
-  --IC coffers only have 1 set, so every set2 var will be 0 or nil!
-  local _, _, _, _, _, set1Id = GetItemLinkContainerSetInfo(itemLink, 1)
-  local _, _, _, _, _, set2Id = GetItemLinkContainerSetInfo(itemLink, 2)
-
-  local set1Collected = 0
-  local set2Collected = 0
-  local total = 0 --IC coffer drop only 1 set -> Undaunted Coffers drop 6 shoulder pieces. IC Coffers drop 3.
-  if type == 0 then total = 6 end
-  if type == 1 then total = 3 end
-  if type == 2 or type == 3 then total = 3 end
-  if type == 4 then total = 36 end
-
-  if type == 0 or type == 1 then
-    for i = 4, 6 do --1 to 3 are the mask pieces. We need only the shoulders
-      if Uncoffered.IsCollectedFromSetId(set1Id, i) then
-        set1Collected = set1Collected + 1
-      end
-      if Uncoffered.IsCollectedFromSetId(set2Id, i) then
-        set2Collected = set2Collected + 1
-      end
-    end
-  elseif type == 2 or type == 3 then
-    for i = 1, 3 do --1 to 3 are the mask pieces
-      if Uncoffered.IsCollectedFromSetId(set1Id, i) then
-        set1Collected = set1Collected + 1
-      end
-    end
-  elseif type == 4 then
-    for i = 1, 36 do --1 to 3 are the mask pieces
-      if Uncoffered.IsCollectedFromSetId(set1Id, i) then
-        set1Collected = set1Collected + 1
+function Uncoffered.GetCofferType(cofferId)
+  for k, v in pairs(UncofferedData.Undaunted) do
+    if k == cofferId then
+      return UNDAUNTED_MYSTERY
+    else
+      for _, i in ipairs(v) do
+        if i == cofferId then return UNDAUNTED_NORMAL end
       end
     end
   end
 
-  local totalCollected = set1Collected + set2Collected
-  local pCollected = (totalCollected / total)
-  local pUncollected = 1 - pCollected
-
-  --returns all the collected info
-  return cofferId, cofferName, totalCollected, total, pCollected, pUncollected, set1Id, set2Id
-end
-
-function Uncoffered.GetMysteryInfo(itemLink, type)
-  --returns info on a mystery coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer
-  --type == 4 --> IA
-
-  local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
-  local cofferName = GetItemLinkName(itemLink)
-  local totalCollected = 0
-  --cofferAmount comes from hardcoded Database
-  local setsAmount = #UncofferedData.CofferDB[cofferId]
-  local total
-  --Undaunted Coffers drop double the shoulder
-  if type == 0 then total = (setsAmount * 3 * 2) end
-  if type == 1 then total = (setsAmount * 3) end
-
-  --Table for saving the % of each normal coffer. Used to find the one with the best and output in the tooltip as advice, which one to open.
-  local normalTable = {}
-
-  for i = 1, setsAmount do
-    --Counts the collected amount of shoulder and saves the highest amount of uncollected % in the table
-    local normalId = UncofferedData.CofferDB[cofferId][i]
-    local normalItemLink = (Uncoffered.GetItemLinkFromId(normalId))
-    local _, _, tCollected = Uncoffered.GetNormalInfo(normalItemLink, type)
-    totalCollected = totalCollected + tCollected
-    table.insert(normalTable, Uncoffered.GetItemLinkFromId(normalId))
-  end
-  local pCollected = (totalCollected / total)
-  local pUncollected = 1 - pCollected
-  local pCollectedPow = pCollected ^ 5
-  if type == 0 then pCollectedPow = pCollected ^ 5 end
-  if type == 1 then pCollectedPow = pCollected ^ 2 end
-  local pUncollectedPow = 1 - pCollectedPow
-
-  --returns all the collected info
-  return cofferId, cofferName, totalCollected, total, pCollected, pUncollected, pCollectedPow, pUncollectedPow
-  , normalTable
-end
-
-function Uncoffered.GetBestNormalFromMystery(itemLink, type)
-  --returns the normal coffer, with the highest chances for a new item, thats related to the mystery coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer
-
-  --gets the table with the % of every related normal coffer
-  local cofferId, _, _, _, _, _, _, _, normalTable = Uncoffered.GetMysteryInfo(itemLink, type)
-
-  local highestP = 0
-  local highestName = ""
-  local highestId
-  local highestItemLink
-  --finds the highest % and the name of the coffer (Same Order in the hardcoded Database)
-  for i = 1, #normalTable do
-    local cId, cName, _, _, _, pUncollected, _, _ = Uncoffered.GetNormalInfo(normalTable[i], type)
-    if highestP < pUncollected then
-      highestP = pUncollected
-      highestItemLink = normalTable[i]
-      highestId = cId
-      highestName = cName
+  for k, v in pairs(UncofferedData.IC) do
+    if k == cofferId then
+      return IMPERIAL_CITY_MYSTERY
+    else
+      for _, i in ipairs(v) do
+        if i == cofferId then return IMPERIAL_CITY_NORMAL end
+      end
     end
   end
 
-  --returns the highest % and the name of the coffer
-  return highestItemLink, highestId, highestName, highestP
-end
+  if UncofferedData.Cyrodiil[cofferId] then return UncofferedData.Cyrodiil[cofferId] end
 
-local function GetToolTipTextMystery(itemLink, type)
-  --writes and returns string with the tooltip text for a mystery coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer
+  if UncofferedData.IA[cofferId] then return UncofferedData.IA[cofferId] end
 
-  --get all the info needed for the tooltip
-  local _, cofferName, totalCollected, total, _, _, _, pUncollectedPow = Uncoffered.GetMysteryInfo(itemLink, type)
-  local _, _, highestName, highestP = Uncoffered.GetBestNormalFromMystery(itemLink, type)
-
-  local str = ""
-
-  --sets the vars for the difference between IC and Undaunted Coffers
-  local toOpen, normalCost
-  if type == 0 then
-    toOpen, normalCost = "5", "5|t24:24:esoui/art/currency/undauntedkey_64.dds|t"
-  end
-  if type == 1 then
-    toOpen, normalCost = "2", "20k|t24:24:esoui/art/currency/currency_telvar_64.dds|t"
-  end
-
-  --If everything is collected, we don't need any fancy tooltip
-  if totalCollected == total then
-    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
-      totalCollected, total, cEnd())
-  end
-
-  --concats the string
-  str = str .. string.format("%d/%d Collected\n", totalCollected, total)
-  str = str ..
-      string.format("Open %dx %s: %s\n", toOpen, cofferName, pColoredStr(pUncollectedPow, highestP, "00FF00", "FF0000"))
-  str = str ..
-      string.format("Best %s Coffer: %s (%s)", normalCost, highestName,
-        pColoredStr(highestP, pUncollectedPow, "00FF00", "FF0000"))
-  return str --returns the finished string
-end
-
-local function GetToolTipTextNormal(itemLink, type)
-  --writes and returns string with the tooltip text for a normal coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer
-
-  --get all the info needed for the tooltip
-  local _, cofferName, totalCollected, total, _, pUncollected = Uncoffered.GetNormalInfo(itemLink, type)
-  local _, mysteryName, _, totalMystery, _, _, _, pMysteryPow = Uncoffered.GetMysteryInfo(
-    Uncoffered.GetMysteryFromNormal(itemLink)
-    , type)
-
-  --writes and returns string with the tooltip text for a normal coffer
-  local str = ""
-  local toOpen = 0
-
-  --sets the vars for the difference between IC and Undaunted Coffers
-  if type == 1 then toOpen = 2 end
-  if type == 0 then toOpen = 5 end
-
-  --If everything is collected, we don't need any fancy tooltip
-  if totalCollected == total then
-    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
-      totalCollected, total, cEnd())
-  end
-
-  --concats the string
-  str = str .. string.format("%d/%d Collected\n", totalCollected, total)
-  --@SimpsForBreda uncomment the line below
-  --[[ str = str ..
-      string.format("New %s item from %dx %s: %.2f%%\n", cofferName, toOpen, mysteryName,
-        (1 - ((totalMystery - (total - totalCollected)) / totalMystery) ^ toOpen) * 100) ]]
-  str = str .. string.format("Chance for any new shoulder:\n")
-  str = str .. string.format("1x %s: %s\n", cofferName, pColoredStr(pUncollected, pMysteryPow, "00FF00", "FF0000"))
-  str = str ..
-      string.format("%dx %s: %s", toOpen, mysteryName, pColoredStr(pMysteryPow, pUncollected, "00FF00", "FF0000"))
-
-  return str --returns the finished string
-end
-
-local function GetToolTipTextCyrodiil(itemLink, type)
-  --writes and returns string with the tooltip text for a normal coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer/Cyrodiil
-  --type == 2 --> Cyrodiil Shoulder
-  --type == 3 --> Cyrodiil Head
-
-  --get all the info needed for the tooltip
-  local _, cofferName, totalCollected, total, _, pUncollected = Uncoffered.GetNormalInfo(itemLink, type)
-
-  --writes and returns string with the tooltip text for a normal coffer
-  local str = ""
-
-  --If everything is collected, we don't need any fancy tooltip
-  if totalCollected == total then
-    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
-      totalCollected, total, cEnd())
-  end
-
-  --concats the string
-  str = str .. string.format("%d/%d Collected\n", totalCollected, total)
-  --@SimpsForBreda uncomment the line below
-  --[[ str = str ..
-      string.format("New %s item from %dx %s: %.2f%%\n", cofferName, toOpen, mysteryName,
-        (1 - ((totalMystery - (total - totalCollected)) / totalMystery) ^ toOpen) * 100) ]]
-  str = str .. string.format("Chance for any new item:\n")
-  str = str .. string.format("%.2f%s\n", pUncollected * 100, "%")
-  str = str .. string.format("There is no Mystery Coffer for these, so good luck!")
-
-  return str --returns the finished string
-end
-
-local function GetToolTipTextIA(itemLink, type)
-  --writes and returns string with the tooltip text for a normal coffer
-  --type == 0 -> Undaunted Coffer
-  --type == 1 --> Imperial City Coffer/Cyrodiil
-  --type == 2 --> Cyrodiil Shoulder
-  --type == 3 --> Cyrodiil Head
-  --type == 4 --> IA
-  --[[ if type == 4 then
-    return "IA"
-  end ]]
-
-  --get all the info needed for the tooltip
-  local _, cofferName, totalCollected, total, _, pUncollected = Uncoffered.GetNormalInfo(itemLink, type)
-
-  --writes and returns string with the tooltip text for a normal coffer
-  local str = ""
-
-  --If everything is collected, we don't need any fancy tooltip
-  if totalCollected == total then
-    return string.format("%s%s/%s Collected.\nEverything has been collected. Well done!%s", cStart("888888"),
-      totalCollected, total, cEnd())
-  end
-
-
-
-  --concats the string
-  str = str .. string.format("%d/%d Collected\n", totalCollected, total)
-  --@SimpsForBreda uncomment the line below
-  --[[ str = str ..
-      string.format("New %s item from %dx %s: %.2f%%\n", cofferName, toOpen, mysteryName,
-        (1 - ((totalMystery - (total - totalCollected)) / totalMystery) ^ toOpen) * 100) ]]
-  str = str .. string.format("Chance for any new item:\n")
-  str = str .. string.format("%.2f%s\n", pUncollected * 100, "%")
-  str = str .. string.format("There is no Mystery Coffer for these, so good luck!")
-
-  return str --returns the finished string
+  return 0
 end
 
 local function GetInfoText(itemLink)
   --returns final tooltip text. Whatever string is returned here, will end up in the tooltip
-  --decision about what type of coffer it is, happens here
 
-  local cofferId = Uncoffered.GetIdFromItemLink(itemLink)
-  local type = 0 --Undaunted
+  local cofferId = GetItemLinkItemId(itemLink)
+  local type = Uncoffered.GetCofferType(cofferId)
 
-  if UncofferedData.CofferDB[cofferId] ~= nil then
-    --Mystery Coffer
-    if cofferId == 184208 then type = 1 end      --IC
-    return GetToolTipTextMystery(itemLink, type) --gets the tooltip string and returns it
-  end
-
-  if Uncoffered.GetMysteryFromNormal(itemLink) ~= nil then
-    --Normal Coffer
-    local mysteryCoffer = Uncoffered.GetMysteryFromNormal(itemLink)
-    if Uncoffered.GetIdFromItemLink(mysteryCoffer) == 184208 then type = 1 else type = 0 end --IC or Undaunted Coffer
-    return GetToolTipTextNormal(itemLink, type)                                              --gets the tooltip string and returns it
-  end
-
-  for k, v in pairs(UncofferedData.CofferDB["Cyrodiil"]) do
-    if k == cofferId then
-      type = 2 + v
-      return GetToolTipTextCyrodiil(itemLink, type)
-    end
-  end
-
-  for _, v in ipairs(UncofferedData.CofferDB["IA"]) do
-    if v == cofferId then
-      type = 4
-      return GetToolTipTextIA(itemLink, type)
-    end
-  end
+  return Uncoffered.functions[type](itemLink)
 end
 
 local function AddInfo(tooltip, item)
@@ -371,7 +123,7 @@ end
 
 local function GetItemID(itemLink)
   if not debug then return end
-  return "\n" .. Uncoffered.GetIdFromItemLink(itemLink)
+  return "\n" .. GetItemLinkItemId(itemLink)
 end
 
 local function TooltipHook(tooltipControl, method, linkFunc)
@@ -424,9 +176,9 @@ EVENT_MANAGER:RegisterForEvent(Uncoffered.name, EVENT_ADD_ON_LOADED, Uncoffered.
 -- Slash Commands --
 ----------------------------------------------
 
-local function printCoffers(id)
-  for i = 1, #UncofferedData.CofferDB[id] do
-    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(UncofferedData.CofferDB[id][i]))
+local function printCoffers(db, id)
+  for i = 1, #db[id] do
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(db[id][i]))
   end
 end
 
@@ -442,16 +194,16 @@ SLASH_COMMANDS["/uncoffered"] = function(args)
       "This is a debug function. I left it in, with debug off, since I think, it could be usefull in non-debug mode as well.")
     d(getTimeStamp() .. "Base Game 1----------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(153513))
-    printCoffers(153513)
+    printCoffers(UncofferedData.Undaunted, 153513)
     d(getTimeStamp() .. "Base Game 2----------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(153514))
-    printCoffers(153514)
+    printCoffers(UncofferedData.Undaunted, 153514)
     d(getTimeStamp() .. "DLC Dungeons---------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(153515))
-    printCoffers(153515)
+    printCoffers(UncofferedData.Undaunted, 153515)
     d(getTimeStamp() .. "Imperial City--------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(184208))
-    printCoffers(184208)
+    printCoffers(UncofferedData.IC, 184208)
     d(getTimeStamp() .. "Cyrodiil-------------------")
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(199140))
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(198854))
@@ -459,6 +211,21 @@ SLASH_COMMANDS["/uncoffered"] = function(args)
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(198798))
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(199142))
     d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(198713))
+    d(getTimeStamp() .. "IA-------------------")
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203097))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203107))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203103))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203099))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203095))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203101))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203105))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203098))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203108))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203104))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203100))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203096))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203102))
+    d(getTimeStamp() .. Uncoffered.GetItemLinkFromId(203106))
     return
   end
 
