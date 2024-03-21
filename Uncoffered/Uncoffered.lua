@@ -1,6 +1,6 @@
 Uncoffered = {
   name = "Uncoffered",
-  version = "2.0.0",
+  version = "2.0.3",
   author = "@Complicative",
 }
 
@@ -30,7 +30,7 @@ end
 local UNDAUNTED_MYSTERY, UNDAUNTED_NORMAL = 1, 2
 local IMPERIAL_CITY_MYSTERY, IMPERIAL_CITY_NORMAL = 3, 4
 local CYRODIIL_SHOULDERS, CYRODIIL_MASK = 5, 6
-local INFINITE_ARCHIVE_CURRATED, INFINITE_ARCHIVE_NORMAL = 7, 8
+local INFINITE_ARCHIVE_CURATED, INFINITE_ARCHIVE_NORMAL = 7, 8
 
 Uncoffered.functions = {
   [0] = function() return end,
@@ -40,7 +40,7 @@ Uncoffered.functions = {
   [IMPERIAL_CITY_NORMAL] = UCIC.GetNormalText,
   [CYRODIIL_SHOULDERS] = UCCyrodiil.GetShoulderText,
   [CYRODIIL_MASK] = UCCyrodiil.GetMaskText,
-  [INFINITE_ARCHIVE_CURRATED] = UCIA.GetCurratedText,
+  [INFINITE_ARCHIVE_CURATED] = UCIA.GetCuratedText,
   [INFINITE_ARCHIVE_NORMAL] = UCIA.GetNormalText,
 }
 

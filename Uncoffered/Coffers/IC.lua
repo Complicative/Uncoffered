@@ -81,10 +81,12 @@ function UCIC.GetNormalText(itemLink)
         local line2 = "Everything has been collected. Well done!"
         return cStart("888888") .. line1 .. line2 .. cEnd()
     end
-    local line2 = string.format("\nExpected Cost for New Piece: %.1f %s\n", normalCoffer.expectedCost, currencyIcon)
-    local line3 = string.format("\n%s\nExpected Cost for ANY New Piece: %.1f %s",
+    local line2 = string.format("\nExpected Cost for New Piece: %s %s\n",
+        ZO_CommaDelimitDecimalNumber(zo_roundToNearest(normalCoffer.expectedCost, .1)),
+        currencyIcon)
+    local line3 = string.format("\n%s\nExpected Cost for ANY New Piece: %s %s",
         GetNormalItemLinkMysteryItemLink(itemLink),
-        mysteryCoffer.expectedCost, currencyIcon)
+        ZO_CommaDelimitDecimalNumber(zo_roundToNearest(mysteryCoffer.expectedCost, .1)), currencyIcon)
     return line1 .. line2 .. line3
 end
 
@@ -104,8 +106,10 @@ function UCIC.GetMysteryText(itemLink)
         local line2 = "Everything has been collected. Well done!"
         return cStart("888888") .. line1 .. line2 .. cEnd()
     end
-    local line2 = string.format("\nExpected Cost for New Piece: %.1f %s\n", mysteryCoffer.expectedCost, currencyIcon)
-    local line3 = string.format("\nBest Coffer for New Piece:\n%s (Exp Cost: %.1f %s)", bestCoffer, bestExp,
+    local line2 = string.format("\nExpected Cost for New Piece: %s %s\n",
+        ZO_CommaDelimitDecimalNumber(zo_roundToNearest(mysteryCoffer.expectedCost, .1)), currencyIcon)
+    local line3 = string.format("\nBest Coffer for New Piece:\n%s (Exp Cost: %s %s)", bestCoffer,
+        ZO_CommaDelimitDecimalNumber(zo_roundToNearest(bestExp, .1)),
         currencyIcon)
 
     return line1 .. line2 .. line3

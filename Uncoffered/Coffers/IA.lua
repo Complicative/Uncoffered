@@ -6,15 +6,6 @@ local function cEnd() return "|r" end             --return colour end string
 
 local currencyIcon = "|t24:24:esoui/art/currency/archivalfragments_64.dds|t"
 
-local function GetNormalItemLinkMysteryItemLink(itemLink)
-    local normalId = GetItemLinkItemId(itemLink)
-    for k, v in pairs(UncofferedData.Undaunted) do
-        for _, i in ipairs(v) do
-            if i == normalId then return Uncoffered.GetItemLinkFromId(k) end
-        end
-    end
-end
-
 local function GetInfo(itemLink)
     --Ids of the sets that can drop from the coffer
     --IC coffers only have 1 set, so every set2 var will be 0 or nil!
@@ -53,13 +44,13 @@ function UCIA.GetNormalText(itemLink)
     local line2 = string.format("\nExpected Cost for New Piece: %s %s\n",
         ZO_CommaDelimitDecimalNumber(zo_roundToNearest(normalCoffer.expectedCost, .1)), currencyIcon)
     if normalCoffer.expectedCost >= 15000 then
-        local line3 = "The Expected Cost is higher than that of the Currated Coffer!\nDon't buy!"
+        local line3 = "The Expected Cost is higher than that of the Curated Coffer!\nDon't buy!"
         return cStart("CC0000") .. line1 .. line2 .. line3 .. cEnd()
     end
     return line1 .. line2
 end
 
-function UCIA.GetCurratedText(itemLink)
+function UCIA.GetCuratedText(itemLink)
     local normalCoffer = {}
     normalCoffer.setId1, normalCoffer.setCol1, normalCoffer.total, normalCoffer.expectedCost =
         GetInfo(itemLink)
@@ -71,10 +62,10 @@ function UCIA.GetCurratedText(itemLink)
         local line2 = "Everything has been collected. Well done!"
         return cStart("888888") .. line1 .. line2 .. cEnd()
     end
-    local line2 = string.format("\nExpected Cost from non-Currated Coffer:\n%s %s\n",
+    local line2 = string.format("\nExpected Cost from non-Curated Coffer:\n%s %s\n",
         ZO_CommaDelimitDecimalNumber(zo_roundToNearest(normalCoffer.expectedCost, .1)), currencyIcon)
     if normalCoffer.expectedCost < 15000 then
-        local line3 = "The Expected Cost is lower on the non-Currated Coffer.\nYou might want to buy that instead."
+        local line3 = "The Expected Cost is lower on the non-Curated Coffer.\nYou might want to buy that instead."
         return line1 .. line2 .. cStart("CC0000") .. line3 .. cEnd()
     end
     return line1 .. line2
